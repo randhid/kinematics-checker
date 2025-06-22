@@ -1,0 +1,13 @@
+{
+  "module_name": "kinematics-utils",
+  "namespace": "rand",
+  "language": "go",
+  "resource_type": "component",
+  "resource_subtype": "arm",
+  "model_name": "kinematics-checker",
+  "enable_cloud_build": true,
+  "initialize_git": false,
+  "generator_version": "0.1.0",
+  "generated_on": "2025-06-22T23:09:50.596078Z",
+  "module_readme_link": "README.md"
+}
