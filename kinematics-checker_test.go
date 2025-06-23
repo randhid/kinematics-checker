@@ -62,9 +62,6 @@ func TestNewKinematicsChecker(t *testing.T) {
 	test.That(t, err, test.ShouldBeNil)
 	test.That(t, arm, test.ShouldNotBeNil)
 
-	// Test that it implements the arm interface
-	_ = arm
-
 	// Test Name method
 	test.That(t, arm.Name(), test.ShouldResemble, name)
 
@@ -200,5 +197,5 @@ func TestKinematicsCheckerWithCADFile(t *testing.T) {
 	// Test that geometries include the CAD mesh
 	geometries, err := arm.Geometries(ctx, nil)
 	test.That(t, err, test.ShouldBeNil)
-	test.That(t, len(geometries), test.ShouldBeGreaterThan, 0)
+	test.That(t, len(geometries), test.ShouldEqual, 7)
 }

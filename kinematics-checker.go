@@ -66,7 +66,11 @@ func NewKinematicsChecker(ctx context.Context, deps resource.Dependencies, name 
 		mesh.Transform(conf.CADTransform)
 	}
 
-	positions := make([]referenceframe.Input, 0, len(model.DoF()))
+	numJoints := len(model.DoF())
+	positions := make([]referenceframe.Input, numJoints)
+	for i := range positions {
+		positions[i] = referenceframe.Input{Value: 0.0}
+	}
 
 	s := &kinChecker{
 		name:   name,

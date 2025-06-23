@@ -26,8 +26,8 @@
     {
       "api": "rdk:component:camera",
       "model": "rand:kinematics-utils:pointcloud-viz",
-      "short_description": "Visualize point clouds in RDK",
-      "markdown_link": "README.md#pointcloud-visualizer"
+      "short_description": "Visualize 3D point cloud files in RDK",
+      "markdown_link": "README.md#point-cloud-visualizer"
     }
   ],
   "applications": null,
