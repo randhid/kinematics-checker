@@ -7,6 +7,12 @@ import (
 	"go.viam.com/rdk/resource"
 )
 
+// Command keys for URDF converter service
+const (
+	URDFCommand     = "urdf"
+	URDF2SVACommand = "urdf2sva"
+)
+
 // New creates a new URDFConverterService
 func New(ctx context.Context) (*URDFConverterService, error) {
 	return &URDFConverterService{}, nil
@@ -14,6 +20,13 @@ func New(ctx context.Context) (*URDFConverterService, error) {
 
 // DoCommand handles generic service commands
 func (s *URDFConverterService) DoCommand(ctx context.Context, cmd map[string]interface{}) (map[string]interface{}, error) {
+	switch cmd["command"] {
+	case URDFCommand:
+		// Handle URDF conversion
+	case URDF2SVACommand:
+		// Handle URDF to SVA conversion
+	}
+
 	return nil, nil
 }
 

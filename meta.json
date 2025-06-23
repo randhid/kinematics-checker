@@ -9,7 +9,19 @@
       "api": "rdk:component:arm",
       "model": "rand:kinematics-utils:kinematics-checker",
       "short_description": "Check your SVA or URDF kienmatics against CAD models",
-      "markdown_link": "README.md#model-randkinematics-utilskinematics-checker"
+      "markdown_link": "README.md#kinematics-checker"
+    },
+    {
+      "api": "rdk:component:gripper",
+      "model": "rand:kinematics-utils:mesh-viz",
+      "short_description": "Visualize 3D mesh files in RDK",
+      "markdown_link": "README.md#mesh-vizualizer"
+    },
+    {
+      "api": "rdk:generic:service",
+      "model": "rand:kinematics-utils:urdf-converter",
+      "short_description": "Convert to viam-compatible urdfs and between SVA and URDF file formats",
+      "markdown_link": "README.md#urdf-converter"
     }
   ],
   "applications": null,
