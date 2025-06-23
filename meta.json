@@ -22,6 +22,12 @@
       "model": "rand:kinematics-utils:urdf-converter",
       "short_description": "Convert to viam-compatible urdfs and between SVA and URDF file formats",
       "markdown_link": "README.md#urdf-converter"
+    },
+    {
+      "api": "rdk:component:camera",
+      "model": "rand:kinematics-utils:pointcloud-viz",
+      "short_description": "Visualize point clouds in RDK",
+      "markdown_link": "README.md#pointcloud-visualizer"
     }
   ],
   "applications": null,

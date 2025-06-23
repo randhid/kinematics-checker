@@ -95,6 +95,35 @@ The URDF converter supports the following commands via `DoCommand`:
 }
 ```
 
+### Point Cloud Visualizer
+
+A camera component that loads and visualizes 3D point cloud files for debugging and visualization purposes.
+
+#### Configuration
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pointcloud_file` | string | Yes | Path to the point cloud file in PCD format |
+| `transform` | []float | No | Optional transform to apply to the point cloud (pose) |
+
+#### Example Configuration
+
+```json
+{
+  "pointcloud_file": "robot_scan.pcd",
+  "transform": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "o_x": 0.0,
+    "o_y": 0.0,
+    "o_z": 1.0,
+    "theta": 0.0
+  }
+}
+```
+
+
 ## Installation
 
 1. Add the module to your robot configuration:
@@ -164,4 +193,47 @@ The URDF converter supports the following commands via `DoCommand`:
     <axis xyz="0 0 1"/>
   </joint>
 </robot>
+```
+
+### URDF Converter Service Setup
+
+```json
+{
+  "services": [
+    {
+      "name": "urdf-converter",
+      "type": "generic",
+      "model": "rand:kinematics-utils:urdf-converter",
+      "attributes": {
+        "urdf-file": "robot.urdf"
+      }
+    }
+  ]
+}
+```
+
+### Point Cloud Visualizer Setup
+
+```json
+{
+  "components": [
+    {
+      "name": "pointcloud-viz",
+      "type": "camera",
+      "model": "rand:kinematics-utils:pointcloud-viz",
+      "attributes": {
+        "pointcloud_file": "robot_scan.pcd",
+        "transform": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "o_x": 0.0,
+          "o_y": 0.0,
+          "o_z": 1.0,
+          "theta": 0.0
+        }
+      }
+    }
+  ]
+}
 ```

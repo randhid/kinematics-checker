@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"go.viam.com/rdk/components/arm"
+	"go.viam.com/rdk/components/camera"
 	"go.viam.com/rdk/components/gripper"
 	"go.viam.com/rdk/resource"
 	"go.viam.com/rdk/services/generic"
@@ -34,6 +35,12 @@ func init() {
 	resource.RegisterComponent(gripper.API, MeshViz,
 		resource.Registration[gripper.Gripper, *MeshVizConfig]{
 			Constructor: newMeshViz,
+		},
+	)
+
+	resource.RegisterComponent(camera.API, PointCloudViz,
+		resource.Registration[camera.Camera, *PointCloudVizConfig]{
+			Constructor: newPointCloudViz,
 		},
 	)
 }
