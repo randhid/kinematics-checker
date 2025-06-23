@@ -2,7 +2,7 @@
   "$schema": "https://dl.viam.dev/module.schema.json",
   "module_id": "rand:kinematics-utils",
   "visibility": "public",
-  "url": "",
+  "url": "https://github.com/rand-labs/kinematics-utils",
   "description": "Modular arm component: kinematics-checker",
   "models": [
     {
