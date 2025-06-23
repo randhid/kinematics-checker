@@ -2,8 +2,6 @@ package kinematicsutils
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"go.viam.com/rdk/components/arm"
@@ -53,41 +51,8 @@ func TestNewKinematicsChecker(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
-	// Create a temporary directory for test files
-	tempDir := t.TempDir()
-	kinematicsFile := filepath.Join(tempDir, "ur20.json")
-
-	// Copy the test kinematics file
-	content := `{
-		"name": "UR20",
-		"kinematic_param_type": "SVA",
-		"links": [
-			{
-				"id": "base_link",
-				"parent": "world"
-			}
-		],
-		"joints": [
-			{
-				"id": "shoulder_pan_joint",
-				"type": "revolute",
-				"parent": "base_link",
-				"axis": {
-					"x": 0,
-					"y": 0,
-					"z": 1
-				},
-				"max": 360,
-				"min": -360
-			}
-		]
-	}`
-
-	err := os.WriteFile(kinematicsFile, []byte(content), 0644)
-	test.That(t, err, test.ShouldBeNil)
-
 	config := &KinConfig{
-		KinematicsFile: kinematicsFile,
+		KinematicsFile: "ur20.json",
 	}
 
 	name := arm.Named("test-arm")
@@ -101,7 +66,7 @@ func TestNewKinematicsChecker(t *testing.T) {
 	_ = arm
 
 	// Test Name method
-	test.That(t, arm.Name(), test.ShouldEqual, name)
+	test.That(t, arm.Name(), test.ShouldResemble, name)
 
 	// Test Close method
 	err = arm.Close(ctx)
@@ -112,41 +77,8 @@ func TestKinematicsCheckerInterface(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
-	// Create a temporary directory for test files
-	tempDir := t.TempDir()
-	kinematicsFile := filepath.Join(tempDir, "ur20.json")
-
-	// Copy the test kinematics file
-	content := `{
-		"name": "UR20",
-		"kinematic_param_type": "SVA",
-		"links": [
-			{
-				"id": "base_link",
-				"parent": "world"
-			}
-		],
-		"joints": [
-			{
-				"id": "shoulder_pan_joint",
-				"type": "revolute",
-				"parent": "base_link",
-				"axis": {
-					"x": 0,
-					"y": 0,
-					"z": 1
-				},
-				"max": 360,
-				"min": -360
-			}
-		]
-	}`
-
-	err := os.WriteFile(kinematicsFile, []byte(content), 0644)
-	test.That(t, err, test.ShouldBeNil)
-
 	config := &KinConfig{
-		KinematicsFile: kinematicsFile,
+		KinematicsFile: "ur20.json",
 	}
 
 	name := arm.Named("test-arm")
@@ -200,41 +132,8 @@ func TestKinematicsCheckerMovement(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
-	// Create a temporary directory for test files
-	tempDir := t.TempDir()
-	kinematicsFile := filepath.Join(tempDir, "ur20.json")
-
-	// Copy the test kinematics file
-	content := `{
-		"name": "UR20",
-		"kinematic_param_type": "SVA",
-		"links": [
-			{
-				"id": "base_link",
-				"parent": "world"
-			}
-		],
-		"joints": [
-			{
-				"id": "shoulder_pan_joint",
-				"type": "revolute",
-				"parent": "base_link",
-				"axis": {
-					"x": 0,
-					"y": 0,
-					"z": 1
-				},
-				"max": 360,
-				"min": -360
-			}
-		]
-	}`
-
-	err := os.WriteFile(kinematicsFile, []byte(content), 0644)
-	test.That(t, err, test.ShouldBeNil)
-
 	config := &KinConfig{
-		KinematicsFile: kinematicsFile,
+		KinematicsFile: "ur20.json",
 	}
 
 	name := arm.Named("test-arm")
@@ -285,57 +184,9 @@ func TestKinematicsCheckerWithCADFile(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
-	// Create a temporary directory for test files
-	tempDir := t.TempDir()
-	kinematicsFile := filepath.Join(tempDir, "ur20.json")
-	cadFile := filepath.Join(tempDir, "test.ply")
-
-	// Create test files
-	kinematicsContent := `{
-		"name": "UR20",
-		"kinematic_param_type": "SVA",
-		"links": [
-			{
-				"id": "base_link",
-				"parent": "world"
-			}
-		],
-		"joints": [
-			{
-				"id": "shoulder_pan_joint",
-				"type": "revolute",
-				"parent": "base_link",
-				"axis": {
-					"x": 0,
-					"y": 0,
-					"z": 1
-				},
-				"max": 360,
-				"min": -360
-			}
-		]
-	}`
-
-	err := os.WriteFile(kinematicsFile, []byte(kinematicsContent), 0644)
-	test.That(t, err, test.ShouldBeNil)
-
-	// Create a simple PLY file
-	plyContent := `ply
-format ascii 1.0
-element vertex 3
-property float x
-property float y
-property float z
-end_header
-0.0 0.0 0.0
-1.0 0.0 0.0
-0.0 1.0 0.0
-`
-	err = os.WriteFile(cadFile, []byte(plyContent), 0644)
-	test.That(t, err, test.ShouldBeNil)
-
+	cadFile := "lod_500.ply"
 	config := &KinConfig{
-		KinematicsFile: kinematicsFile,
+		KinematicsFile: "ur20.json",
 		CADFile:        cadFile,
 	}
 

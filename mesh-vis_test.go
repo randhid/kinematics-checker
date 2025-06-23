@@ -89,7 +89,7 @@ end_header
 	_ = gripper
 
 	// Test Name method
-	test.That(t, gripper.Name(), test.ShouldEqual, name)
+	test.That(t, gripper.Name(), test.ShouldResemble, name)
 
 	// Test Close method
 	err = gripper.Close(ctx)
