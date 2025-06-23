@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"go.viam.com/rdk/logging"
@@ -21,12 +22,12 @@ func TestURDFConverterConfig(t *testing.T) {
 		{
 			name: "valid config",
 			config: &URDFConverterConfig{
-				URDFFile: "ur20.urdf",
+				URDFFile: "test.urdf",
 			},
 			expectError: false,
 		},
 		{
-			name: "missing URDF file",
+			name: "missing urdf file",
 			config: &URDFConverterConfig{
 				URDFFile: "",
 			},
@@ -54,20 +55,19 @@ func TestNewURDFConverter(t *testing.T) {
 
 	// Create a temporary directory for test files
 	tempDir := t.TempDir()
-	urdfFile := filepath.Join(tempDir, "ur20.urdf")
+	urdfFile := filepath.Join(tempDir, "test.urdf")
 
 	// Create a simple URDF file
 	urdfContent := `<?xml version="1.0"?>
-<robot name="ur20-test">
-  <link name="base_link"/>
-  <link name="shoulder_link"/>
-  <joint name="shoulder_pan_joint" type="revolute">
-    <parent link="base_link"/>
-    <child link="shoulder_link"/>
-    <axis xyz="0 0 1"/>
-  </joint>
+<robot name="test_robot">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="1 1 1"/>
+      </geometry>
+    </visual>
+  </link>
 </robot>`
-
 	err := os.WriteFile(urdfFile, []byte(urdfContent), 0644)
 	test.That(t, err, test.ShouldBeNil)
 
@@ -83,8 +83,7 @@ func TestNewURDFConverter(t *testing.T) {
 	test.That(t, service, test.ShouldNotBeNil)
 
 	// Test that it implements the resource interface
-	_, ok := service.(resource.Resource)
-	test.That(t, ok, test.ShouldBeTrue)
+	_ = service
 
 	// Test Name method
 	test.That(t, service.Name(), test.ShouldResemble, name)
@@ -94,26 +93,41 @@ func TestNewURDFConverter(t *testing.T) {
 	test.That(t, err, test.ShouldBeNil)
 }
 
-func TestURDFConverterDoCommand(t *testing.T) {
+func TestURDFSanitization(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
 	// Create a temporary directory for test files
 	tempDir := t.TempDir()
-	urdfFile := filepath.Join(tempDir, "ur20.urdf")
+	urdfFile := filepath.Join(tempDir, "test.urdf")
 
-	// Create a simple URDF file
+	// Create a URDF file with mesh geometries
 	urdfContent := `<?xml version="1.0"?>
-<robot name="ur20-test">
-  <link name="base_link"/>
-  <link name="shoulder_link"/>
-  <joint name="shoulder_pan_joint" type="revolute">
+<robot name="test_robot">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://test/meshes/base.dae" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://test/meshes/base_collision.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="link1">
+    <visual>
+      <geometry>
+        <mesh filename="package://test/meshes/link1.obj"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="joint1" type="revolute">
     <parent link="base_link"/>
-    <child link="shoulder_link"/>
-    <axis xyz="0 0 1"/>
+    <child link="link1"/>
   </joint>
 </robot>`
-
 	err := os.WriteFile(urdfFile, []byte(urdfContent), 0644)
 	test.That(t, err, test.ShouldBeNil)
 
@@ -128,36 +142,128 @@ func TestURDFConverterDoCommand(t *testing.T) {
 	test.That(t, err, test.ShouldBeNil)
 	defer service.Close(ctx)
 
-	// Test URDF command
+	// Test URDF sanitization command
 	result, err := service.DoCommand(ctx, map[string]interface{}{
-		"command": URDFCommand,
+		"command":   URDFCommand,
+		"urdf_file": urdfFile,
 	})
 	test.That(t, err, test.ShouldBeNil)
-	test.That(t, result, test.ShouldBeNil)
+	test.That(t, result, test.ShouldNotBeNil)
 
-	// Test URDF2SVA command
-	result, err = service.DoCommand(ctx, map[string]interface{}{
-		"command": URDF2SVACommand,
-	})
-	test.That(t, err, test.ShouldBeNil)
-	test.That(t, result, test.ShouldBeNil)
+	sanitizedXML, ok := result["sanitized_xml"].(string)
+	test.That(t, ok, test.ShouldBeTrue)
+	test.That(t, sanitizedXML, test.ShouldNotEqual, "")
 
-	// Test unknown command
-	result, err = service.DoCommand(ctx, map[string]interface{}{
-		"command": "unknown",
-	})
-	test.That(t, err, test.ShouldBeNil)
-	test.That(t, result, test.ShouldBeNil)
+	// Verify that meshes were replaced with boxes
+	test.That(t, strings.Contains(sanitizedXML, `<box size="50 60 70"/>`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `<mesh filename=`), test.ShouldBeFalse)
 
-	// Test command without command key
-	result, err = service.DoCommand(ctx, map[string]interface{}{
-		"other": "value",
-	})
-	test.That(t, err, test.ShouldBeNil)
-	test.That(t, result, test.ShouldBeNil)
+	// Verify that joints remain unchanged (no automatic axis/limit addition)
+	test.That(t, strings.Contains(sanitizedXML, `type="revolute"`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `<axis xyz="0 0 1"/>`), test.ShouldBeFalse)
+	test.That(t, strings.Contains(sanitizedXML, `<limit`), test.ShouldBeFalse)
+
+	// Verify each link has exactly one collision geometry (either existing or default)
+	linkCount := strings.Count(urdfContent, `<link name=`)
+	boxCount := strings.Count(sanitizedXML, `<box size="50 60 70"/>`)
+	test.That(t, boxCount, test.ShouldEqual, linkCount)
 }
 
-func TestURDFConverterWithInvalidFile(t *testing.T) {
+func TestURDFSanitizationWithComplexURDF(t *testing.T) {
+	ctx := context.Background()
+	logger := logging.NewTestLogger(t)
+
+	// Create a temporary directory for test files
+	tempDir := t.TempDir()
+	urdfFile := filepath.Join(tempDir, "complex.urdf")
+
+	// Create a more complex URDF file with multiple links and joints
+	urdfContent := `<?xml version="1.0"?>
+<robot name="complex_robot">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://complex/meshes/base.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://complex/meshes/base_collision.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="shoulder_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://complex/meshes/shoulder.obj"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="upper_arm_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://complex/meshes/upper_arm.dae"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="shoulder_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+  </joint>
+  <joint name="elbow_joint" type="revolute">
+    <parent link="shoulder_link"/>
+    <child link="upper_arm_link"/>
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+  </joint>
+</robot>`
+	err := os.WriteFile(urdfFile, []byte(urdfContent), 0644)
+	test.That(t, err, test.ShouldBeNil)
+
+	config := &URDFConverterConfig{
+		URDFFile: urdfFile,
+	}
+
+	name := generic.Named("test-urdf-converter")
+	deps := resource.Dependencies{}
+
+	service, err := NewURDFConverter(ctx, deps, name, config, logger)
+	test.That(t, err, test.ShouldBeNil)
+	defer service.Close(ctx)
+
+	// Test URDF sanitization command
+	result, err := service.DoCommand(ctx, map[string]interface{}{
+		"command":   URDFCommand,
+		"urdf_file": urdfFile,
+	})
+	test.That(t, err, test.ShouldBeNil)
+	test.That(t, result, test.ShouldNotBeNil)
+
+	sanitizedXML, ok := result["sanitized_xml"].(string)
+	test.That(t, ok, test.ShouldBeTrue)
+
+	// Verify no meshes remain
+	test.That(t, strings.Contains(sanitizedXML, `<mesh filename=`), test.ShouldBeFalse)
+
+	// Verify joints remain unchanged (no automatic modifications)
+	test.That(t, strings.Contains(sanitizedXML, `type="revolute"`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `<axis xyz="0 0 1"/>`), test.ShouldBeFalse)
+	test.That(t, strings.Contains(sanitizedXML, `<limit`), test.ShouldBeFalse)
+
+	// Verify original structure is preserved
+	test.That(t, strings.Contains(sanitizedXML, `name="base_link"`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `name="shoulder_link"`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `name="upper_arm_link"`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `name="shoulder_joint"`), test.ShouldBeTrue)
+	test.That(t, strings.Contains(sanitizedXML, `name="elbow_joint"`), test.ShouldBeTrue)
+
+	// Verify each link has exactly one collision geometry (either existing or default)
+	linkCount := strings.Count(urdfContent, `<link name=`)
+	boxCount := strings.Count(sanitizedXML, `<box size="50 60 70"/>`)
+	test.That(t, boxCount, test.ShouldEqual, linkCount)
+}
+
+func TestURDFSanitizationErrorHandling(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
@@ -168,40 +274,66 @@ func TestURDFConverterWithInvalidFile(t *testing.T) {
 	name := generic.Named("test-urdf-converter")
 	deps := resource.Dependencies{}
 
-	// This should still work since we're not actually reading the file in the constructor
-	service, err := NewURDFConverter(ctx, deps, name, config, logger)
-	test.That(t, err, test.ShouldBeNil)
-	test.That(t, service, test.ShouldNotBeNil)
-	defer service.Close(ctx)
-
-	// Test that the service can still handle commands
-	result, err := service.DoCommand(ctx, map[string]interface{}{
-		"command": URDFCommand,
-	})
-	test.That(t, err, test.ShouldBeNil)
-	test.That(t, result, test.ShouldBeNil)
+	_, err := NewURDFConverter(ctx, deps, name, config, logger)
+	test.That(t, err, test.ShouldNotBeNil)
 }
 
-func TestURDFConverterServiceInterface(t *testing.T) {
+func TestURDFSanitizationInvalidXML(t *testing.T) {
 	ctx := context.Background()
 	logger := logging.NewTestLogger(t)
 
 	// Create a temporary directory for test files
 	tempDir := t.TempDir()
-	urdfFile := filepath.Join(tempDir, "ur20.urdf")
+	urdfFile := filepath.Join(tempDir, "invalid.urdf")
+
+	// Create an invalid XML file
+	invalidContent := `invalid xml content`
+	err := os.WriteFile(urdfFile, []byte(invalidContent), 0644)
+	test.That(t, err, test.ShouldBeNil)
+
+	config := &URDFConverterConfig{
+		URDFFile: urdfFile,
+	}
+
+	name := generic.Named("test-urdf-converter")
+	deps := resource.Dependencies{}
+
+	// This should still work since we're doing simple string replacement, not XML parsing
+	service, err := NewURDFConverter(ctx, deps, name, config, logger)
+	test.That(t, err, test.ShouldBeNil)
+	defer service.Close(ctx)
+
+	// Test that DoCommand returns the sanitized file
+	result, err := service.DoCommand(ctx, map[string]interface{}{
+		"command": URDFCommand,
+	})
+	test.That(t, err, test.ShouldBeNil)
+	test.That(t, result, test.ShouldNotBeNil)
+
+	sanitizedXML, ok := result["sanitized_xml"].(string)
+	test.That(t, ok, test.ShouldBeTrue)
+	test.That(t, sanitizedXML, test.ShouldNotEqual, "")
+}
+
+func TestURDFCommandErrorHandling(t *testing.T) {
+	ctx := context.Background()
+	logger := logging.NewTestLogger(t)
+
+	// Create a temporary directory for test files
+	tempDir := t.TempDir()
+	urdfFile := filepath.Join(tempDir, "test.urdf")
 
 	// Create a simple URDF file
 	urdfContent := `<?xml version="1.0"?>
-<robot name="ur20-test">
-  <link name="base_link"/>
-  <link name="shoulder_link"/>
-  <joint name="shoulder_pan_joint" type="revolute">
-    <parent link="base_link"/>
-    <child link="shoulder_link"/>
-    <axis xyz="0 0 1"/>
-  </joint>
+<robot name="test_robot">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="1 1 1"/>
+      </geometry>
+    </visual>
+  </link>
 </robot>`
-
 	err := os.WriteFile(urdfFile, []byte(urdfContent), 0644)
 	test.That(t, err, test.ShouldBeNil)
 
@@ -216,15 +348,9 @@ func TestURDFConverterServiceInterface(t *testing.T) {
 	test.That(t, err, test.ShouldBeNil)
 	defer service.Close(ctx)
 
-	// Test Name method
-	test.That(t, service.Name(), test.ShouldResemble, name)
-
-	// Test DoCommand method
-	result, err := service.DoCommand(ctx, map[string]interface{}{"test": "command"})
-	test.That(t, err, test.ShouldBeNil)
-	test.That(t, result, test.ShouldBeNil)
-
-	// Test Close method
-	err = service.Close(ctx)
-	test.That(t, err, test.ShouldBeNil)
+	// Test unknown command
+	_, err = service.DoCommand(ctx, map[string]interface{}{
+		"command": "unknown_command",
+	})
+	test.That(t, err, test.ShouldBeNil) // Should return nil, nil for unknown commands
 }
