@@ -15,10 +15,10 @@
       "api": "rdk:component:gripper",
       "model": "rand:kinematics-utils:mesh-viz",
       "short_description": "Visualize 3D mesh files in RDK",
-      "markdown_link": "README.md#mesh-vizualizer"
+      "markdown_link": "README.md#mesh-visualizer"
     },
     {
-      "api": "rdk:generic:service",
+      "api": "rdk:service:generic",
       "model": "rand:kinematics-utils:urdf-converter",
       "short_description": "Convert to viam-compatible urdfs and between SVA and URDF file formats",
       "markdown_link": "README.md#urdf-converter"
