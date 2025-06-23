@@ -14,7 +14,7 @@
     {
       "api": "rdk:component:gripper",
       "model": "rand:kinematics-utils:mesh-viz",
-      "short_description": "Visualize 3D mesh files in RDK",
+      "short_description": "Visualize 3D mesh files in Viam's visualiser",
       "markdown_link": "README.md#mesh-visualizer"
     },
     {
@@ -26,7 +26,7 @@
     {
       "api": "rdk:component:camera",
       "model": "rand:kinematics-utils:pointcloud-viz",
-      "short_description": "Visualize 3D point cloud files in RDK",
+      "short_description": "Visualize 3D point cloud files in Viam's Visualiser",
       "markdown_link": "README.md#point-cloud-visualizer"
     }
   ],
