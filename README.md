@@ -15,7 +15,15 @@ A modular arm component that checks your SVA or URDF kinematics against CAD mode
 {
   "kinematics_file": "ur20.json",
   "ply-cad-file": "ur20_cad.ply",
-  "cad-transform": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+  "cad-transform": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "o_x": 0.0,
+    "o_y": 0.0,
+    "o_z": 1.0,
+    "theta": 0.0
+  }
 }
 ```
 
