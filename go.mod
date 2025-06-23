@@ -4,10 +4,7 @@ go 1.23.8
 
 toolchain go1.23.10
 
-require (
-	go.viam.com/rdk v0.80.0
-	go.viam.com/utils v0.1.147
-)
+require go.viam.com/rdk v0.80.0
 
 require (
 	cloud.google.com/go v0.115.1 // indirect
@@ -46,6 +43,7 @@ require (
 	github.com/go-latex/latex v0.0.0-20230307184459-12ec69307ad9 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-nlopt/nlopt v0.0.0-20230219125344-443d3362dcb5 // indirect
 	github.com/go-pdf/fpdf v0.6.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.1.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
@@ -133,6 +131,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	go.viam.com/api v0.1.438 // indirect
 	go.viam.com/test v1.2.4 // indirect
+	go.viam.com/utils v0.1.147 // indirect
 	golang.org/x/arch v0.18.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e // indirect
