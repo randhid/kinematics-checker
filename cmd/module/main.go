@@ -1,7 +1,7 @@
 package main
 
 import (
-	"kinematicsutils"
+	kinematicsutils "github.com/randhid/kinematics-utils"
 
 	"go.viam.com/rdk/components/arm"
 	"go.viam.com/rdk/module"
