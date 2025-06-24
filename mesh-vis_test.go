@@ -107,14 +107,24 @@ func TestMeshVizInterface(t *testing.T) {
 	// Create a simple PLY file
 	plyContent := `ply
 format ascii 1.0
-element vertex 3
+comment Created by Open Asset Import Library - http://assimp.sf.net (v5.2.3481089591)
+element vertex 163866
 property float x
 property float y
 property float z
+property float nx
+property float ny
+property float nz
+element face 190653
+property list uchar int vertex_index
 end_header
-0.0 0.0 0.0
-1.0 0.0 0.0
-0.0 1.0 0.0
+6.05000019 7.4000001 52.1994667 -0.993712187 0.111964472 -5.80092499e-17
+5.898314 6.05374813 64.1994629 -0.974927902 0.222520918 -2.01192864e-16
+6.05000019 7.4000001 64.1994629 -0.993712187 0.111964472 -0
+5.898314 6.05374813 52.1994667 -0.974927902 0.222520933 -2.30184062e-16
+5.45086145 4.77500343 52.1994667 -0.916618288 0.399763644 -4.14599731e-16
+5.45086145 4.77500343 64.1994629 -0.884049892 0.467392474 -4.84939703e-16
+4.7300806 3.62788677 52.1994667 -0.781831443 0.623489857 -6.46533419e-16
 `
 	err := os.WriteFile(meshFile, []byte(plyContent), 0644)
 	test.That(t, err, test.ShouldBeNil)

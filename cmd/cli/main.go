@@ -22,7 +22,7 @@ func main() {
 
 func realMain() error {
 	ctx := context.Background()
-	logger := logging.NewLogger("cli")
+	logger := logging.NewDebugLogger("cli")
 
 	deps := resource.Dependencies{}
 	// can load these from a remote machine if you need
@@ -41,7 +41,7 @@ func realMain() error {
 
 	thing3, err := kinematicsutils.NewMeshViz(
 		ctx, deps, gripper.Named("foo3"), &kinematicsutils.MeshVizConfig{
-			MeshFile: "ur20.ply",
+			MeshFile: "ur3e.ply",
 		}, logger)
 	if err != nil {
 		return err

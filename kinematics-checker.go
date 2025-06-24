@@ -96,9 +96,38 @@ func NewKinematicsChecker(ctx context.Context, deps resource.Dependencies, name 
 		}
 	}
 
-	mesh, err := spatialmath.NewMeshFromPLYFile(conf.CADFile)
-	if err != nil {
-		logger.Errorf("no cad ply file parsed with error %v", err)
+	var mesh spatialmath.Geometry
+	if conf.CADFile != "" {
+		// Sanitize PLY file before loading
+		sanitizedPLYFile, sanitizeErr := sanitizePLYFileToTemp(conf.CADFile, logger)
+		if sanitizeErr != nil {
+			logger.Errorf("failed to sanitize PLY file: %v", sanitizeErr)
+		} else {
+			// Clean up the temporary file when we're done
+			defer func() {
+				if sanitizedPLYFile != "" {
+					os.Remove(sanitizedPLYFile)
+				}
+			}()
+
+			// Try to load the sanitized mesh
+			sanitizedMesh, meshErr := spatialmath.NewMeshFromPLYFile(sanitizedPLYFile)
+			if meshErr != nil {
+				logger.Errorf("failed to load sanitized PLY file: %v", meshErr)
+			} else {
+				mesh = sanitizedMesh
+			}
+		}
+
+		// Fallback to original file if sanitization failed
+		if mesh == nil {
+			originalMesh, originalErr := spatialmath.NewMeshFromPLYFile(conf.CADFile)
+			if originalErr != nil {
+				logger.Errorf("failed to load original PLY file: %v", originalErr)
+			} else {
+				mesh = originalMesh
+			}
+		}
 	}
 
 	if conf.CADTransform != nil {
