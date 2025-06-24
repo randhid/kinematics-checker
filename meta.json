@@ -35,7 +35,7 @@
   "entrypoint": "bin/kinematics-utils",
   "first_run": "",
   "build": {
-    "build": "make module.tar.gz",
+    "build": "make --always-make module.tar.gz",
     "setup": "make setup",
     "path": "module.tar.gz",
     "arch": [
