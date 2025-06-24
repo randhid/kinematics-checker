@@ -3,6 +3,7 @@ package kinematicsutils
 import (
 	"context"
 	"os"
+	"strings"
 
 	"go.viam.com/rdk/components/arm"
 	"go.viam.com/rdk/logging"
@@ -53,31 +54,46 @@ func newKinChecker(ctx context.Context, deps resource.Dependencies, rawConf reso
 }
 
 func NewKinematicsChecker(ctx context.Context, deps resource.Dependencies, name resource.Name, conf *KinConfig, logger logging.Logger) (arm.Arm, error) {
-	// First sanitize the URDF file using our URDFConverter logic
-	sanitizedXML, err := sanitizeURDF(conf.KinematicsFile, name.Name, logger)
-	if err != nil {
-		return nil, err
-	}
+	var model referenceframe.Model
+	var err error
 
-	// Create a temporary file with the sanitized XML
-	tmpFile, err := os.CreateTemp("", "sanitized_urdf_*.urdf")
-	if err != nil {
-		return nil, err
-	}
-	defer os.Remove(tmpFile.Name()) // Clean up temp file
+	// Check if the file is URDF (XML) or SVA (JSON) based on file extension
+	if strings.HasSuffix(conf.KinematicsFile, ".urdf") || strings.HasSuffix(conf.KinematicsFile, ".xml") {
+		// Handle URDF file - sanitize first
+		logger.Debugf("Processing URDF file: %s", conf.KinematicsFile)
 
-	// Write sanitized XML to temp file
-	_, err = tmpFile.Write(sanitizedXML)
-	if err != nil {
+		sanitizedXML, err := sanitizeURDF(conf.KinematicsFile, name.Name, logger)
+		if err != nil {
+			return nil, err
+		}
+
+		// Create a temporary file with the sanitized XML
+		tmpFile, err := os.CreateTemp("", "sanitized_urdf_*.urdf")
+		if err != nil {
+			return nil, err
+		}
+		defer os.Remove(tmpFile.Name()) // Clean up temp file
+
+		// Write sanitized XML to temp file
+		_, err = tmpFile.Write(sanitizedXML)
+		if err != nil {
+			tmpFile.Close()
+			return nil, err
+		}
 		tmpFile.Close()
-		return nil, err
-	}
-	tmpFile.Close()
 
-	// Parse the sanitized URDF file
-	model, err := referenceframe.KinematicModelFromFile(tmpFile.Name(), name.Name)
-	if err != nil {
-		return nil, err
+		// Parse the sanitized URDF file
+		model, err = referenceframe.KinematicModelFromFile(tmpFile.Name(), name.Name)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Handle SVA JSON file - use directly
+		logger.Debugf("Processing SVA file: %s", conf.KinematicsFile)
+		model, err = referenceframe.KinematicModelFromFile(conf.KinematicsFile, name.Name)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	mesh, err := spatialmath.NewMeshFromPLYFile(conf.CADFile)
