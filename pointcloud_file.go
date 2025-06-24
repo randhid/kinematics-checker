@@ -10,8 +10,6 @@ import (
 	"go.viam.com/rdk/spatialmath"
 )
 
-var PointCloudViz = family.WithModel("pointcloud-viz")
-
 type PointCloudVizConfig struct {
 	PointCloudFile string           `json:"pointcloud_file"`
 	Transform      spatialmath.Pose `json:"transform,omitempty"`

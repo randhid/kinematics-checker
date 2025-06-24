@@ -15,6 +15,7 @@ var (
 	KinematicsChecker = family.WithModel("kinematics-checker")
 	URDFConverter     = family.WithModel("urdf-converter")
 	MeshViz           = family.WithModel("mesh-viz")
+	PointCloudViz     = family.WithModel("pointcloud-viz")
 
 	errUnimplemented = errors.New("unimplemented")
 )
@@ -23,12 +24,6 @@ func init() {
 	resource.RegisterComponent(arm.API, KinematicsChecker,
 		resource.Registration[arm.Arm, *KinConfig]{
 			Constructor: newKinChecker,
-		},
-	)
-
-	resource.RegisterService(generic.API, URDFConverter,
-		resource.Registration[resource.Resource, *URDFConverterConfig]{
-			Constructor: newURDFConverter,
 		},
 	)
 
@@ -43,4 +38,11 @@ func init() {
 			Constructor: newPointCloudViz,
 		},
 	)
+
+	resource.RegisterService(generic.API, URDFConverter,
+		resource.Registration[resource.Resource, *URDFConverterConfig]{
+			Constructor: newURDFConverter,
+		},
+	)
+
 }
