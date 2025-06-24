@@ -33,6 +33,7 @@ type MeshVizGripper struct {
 	logger logging.Logger
 	cfg    *MeshVizConfig
 	mesh   spatialmath.Geometry
+	model  referenceframe.Model
 }
 
 func newMeshViz(ctx context.Context, deps resource.Dependencies, rawConf resource.Config, logger logging.Logger) (gripper.Gripper, error) {
@@ -59,11 +60,17 @@ func NewMeshViz(ctx context.Context, deps resource.Dependencies, name resource.N
 		mesh.Transform(conf.Transform)
 	}
 
+	model := referenceframe.NewSimpleModel(name.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	return &MeshVizGripper{
 		name:   name,
 		logger: logger,
 		cfg:    conf,
 		mesh:   mesh,
+		model:  model,
 	}, nil
 }
 
@@ -119,7 +126,7 @@ func (g *MeshVizGripper) GoToInputs(ctx context.Context, inputSteps ...[]referen
 
 // Kinematics implements the gripper.Gripper interface
 func (g *MeshVizGripper) Kinematics(ctx context.Context) (referenceframe.Model, error) {
-	return nil, nil
+	return g.model, nil
 }
 
 // sanitizePLYFileToTemp creates a sanitized version of a PLY file and returns the path to the temporary file
