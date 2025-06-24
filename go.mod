@@ -6,6 +6,7 @@ toolchain go1.23.10
 
 require (
 	github.com/golang/geo v0.0.0-20230421003525-6adc56603217
+	github.com/pkg/errors v0.9.1
 	go.viam.com/rdk v0.80.0
 	go.viam.com/test v1.2.4
 )
@@ -109,7 +110,6 @@ require (
 	github.com/pion/transport/v2 v2.2.10 // indirect
 	github.com/pion/turn/v2 v2.1.6 // indirect
 	github.com/pion/webrtc/v3 v3.2.36 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/cors v1.11.1 // indirect

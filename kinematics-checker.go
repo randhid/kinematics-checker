@@ -59,7 +59,7 @@ func NewKinematicsChecker(ctx context.Context, deps resource.Dependencies, name 
 
 	mesh, err := spatialmath.NewMeshFromPLYFile(conf.CADFile)
 	if err != nil {
-		logger.Errorf("no cad ply file parsed with error %w", err)
+		logger.Errorf("no cad ply file parsed with error %v", err)
 	}
 
 	if conf.CADTransform != nil {
@@ -67,9 +67,10 @@ func NewKinematicsChecker(ctx context.Context, deps resource.Dependencies, name 
 	}
 
 	numJoints := len(model.DoF())
-	positions := make([]referenceframe.Input, numJoints)
-	for i := range positions {
-		positions[i] = referenceframe.Input{Value: 0.0}
+	logger.Infof("numJoints: %d", numJoints)
+	inputs := make([]referenceframe.Input, numJoints)
+	for i := range inputs {
+		inputs[i] = referenceframe.Input{Value: 0.0}
 	}
 
 	s := &kinChecker{
@@ -77,7 +78,7 @@ func NewKinematicsChecker(ctx context.Context, deps resource.Dependencies, name 
 		logger: logger,
 		cfg:    conf,
 		model:  model,
-		inputs: positions,
+		inputs: inputs,
 		mesh:   mesh,
 	}
 	return s, nil
