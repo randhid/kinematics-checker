@@ -41,6 +41,12 @@ A modular arm component that checks your SVA or URDF kinematics against CAD mode
 A gripper component that loads and visualizes 3D mesh files for debugging and visualization purposes.
 
 #### Configuration
+```json
+{
+  "mesh-file" : "",
+  "mesh-transform": ""
+}
+```
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -91,7 +97,6 @@ The URDF converter supports the following commands via `DoCommand`:
 ```json
 {
   "command": "urdf",
-  "urdf_file": "robot.urdf"
 }
 ```
 
@@ -99,7 +104,6 @@ The URDF converter supports the following commands via `DoCommand`:
 ```json
 {
   "command": "urdf2sva",
-  "urdf_file": "robot.urdf"
 }
 ```
 
@@ -108,13 +112,6 @@ The URDF converter supports the following commands via `DoCommand`:
 A camera component that loads and visualizes 3D point cloud files for debugging and visualization purposes.
 
 #### Configuration
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `pointcloud_file` | string | Yes | Path to the point cloud file in PCD format |
-| `transform` | []float | No | Optional transform to apply to the point cloud (pose) |
-
-#### Example Configuration
 
 ```json
 {
@@ -131,6 +128,10 @@ A camera component that loads and visualizes 3D point cloud files for debugging 
 }
 ```
 
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pointcloud_file` | string | Yes | Path to the point cloud file in PCD format |
+| `transform` | []float | No | Optional transform to apply to the point cloud (pose) |
 
 ## Installation
 

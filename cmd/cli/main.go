@@ -22,7 +22,7 @@ func main() {
 
 func realMain() error {
 	ctx := context.Background()
-	logger := logging.NewDebugLogger("cli")
+	logger := logging.NewLogger("cli")
 
 	deps := resource.Dependencies{}
 	// can load these from a remote machine if you need
@@ -32,39 +32,51 @@ func realMain() error {
 		CADFile:        "ur20.ply",
 	}
 
-	thing, err := kinematicsutils.NewKinematicsChecker(
+	kincheck, err := kinematicsutils.NewKinematicsChecker(
 		ctx, deps, arm.Named("foo"), &cfg, logger)
 	if err != nil {
 		return err
 	}
-	defer thing.Close(ctx)
+	kin, err := kincheck.Kinematics(ctx)
+	logger.Infof("kincheck: %v, err %v", kin, err)
+	geoms, err := kincheck.Geometries(ctx, nil)
+	logger.Infof("geoms: %v, err %v", geoms, err)
+	defer kincheck.Close(ctx)
 
-	thing3, err := kinematicsutils.NewMeshViz(
+	meshviz, err := kinematicsutils.NewMeshViz(
 		ctx, deps, gripper.Named("foo3"), &kinematicsutils.MeshVizConfig{
 			MeshFile: "ur3e.ply",
 		}, logger)
 	if err != nil {
 		return err
 	}
-	defer thing3.Close(ctx)
 
-	thing4, err := kinematicsutils.NewPointCloudViz(
+	geoms, err = meshviz.Geometries(ctx, nil)
+	logger.Infof("meshviz: %v, err %v", geoms, err)
+	defer meshviz.Close(ctx)
+
+	pcviz, err := kinematicsutils.NewPointCloudViz(
 		ctx, deps, camera.Named("foo4"), &kinematicsutils.PointCloudVizConfig{
 			PointCloudFile: "example.pcd",
 		}, logger)
 	if err != nil {
 		return err
 	}
-	defer thing4.Close(ctx)
 
-	thing2, err := kinematicsutils.NewURDFConverter(
+	defer pcviz.Close(ctx)
+
+	urdfcvrt, err := kinematicsutils.NewURDFConverter(
 		ctx, deps, generic.Named("foo2"), &kinematicsutils.URDFConverterConfig{
 			URDFFile: "ur20.urdf",
 		}, logger)
 	if err != nil {
 		return err
 	}
-	defer thing2.Close(ctx)
+	urdf, err := urdfcvrt.DoCommand(ctx, map[string]interface{}{
+		"urdf2sva": true,
+	})
+	logger.Infof("urdf: %v, err %v", urdf, err)
+	defer urdfcvrt.Close(ctx)
 
 	return nil
 }

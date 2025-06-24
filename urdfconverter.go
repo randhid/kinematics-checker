@@ -17,7 +17,7 @@ import (
 // Command keys for URDF converter service
 const (
 	URDFCommand       = "urdf"
-	URDF2ModelCommand = "urdf2model"
+	URDF2ModelCommand = "urdf2sva"
 )
 
 // New creates a new URDFConverterService
