@@ -7,6 +7,7 @@ toolchain go1.23.10
 require (
 	github.com/golang/geo v0.0.0-20230421003525-6adc56603217
 	github.com/pkg/errors v0.9.1
+	github.com/viam-labs/motion-tools v0.5.2
 	go.viam.com/rdk v0.80.0
 	go.viam.com/test v1.2.4
 )
