@@ -2,14 +2,32 @@
   "$schema": "https://dl.viam.dev/module.schema.json",
   "module_id": "rand:kinematics-utils",
   "visibility": "public",
-  "url": "",
+  "url": "https://github.com/randhid/kinematics-utils",
   "description": "Modular arm component: kinematics-checker",
   "models": [
     {
       "api": "rdk:component:arm",
       "model": "rand:kinematics-utils:kinematics-checker",
-      "short_description": "Provide a short (100 characters or less) description of this model here",
-      "markdown_link": "README.md#model-randkinematics-utilskinematics-checker"
+      "short_description": "Check your SVA or URDF kienmatics against CAD models",
+      "markdown_link": "README.md#kinematics-checker"
+    },
+    {
+      "api": "rdk:component:gripper",
+      "model": "rand:kinematics-utils:mesh-viz",
+      "short_description": "Visualize 3D mesh files in Viam's visualiser",
+      "markdown_link": "README.md#mesh-visualizer"
+    },
+    {
+      "api": "rdk:service:generic",
+      "model": "rand:kinematics-utils:urdf-converter",
+      "short_description": "Convert to viam-compatible urdfs and between SVA and URDF file formats",
+      "markdown_link": "README.md#urdf-converter"
+    },
+    {
+      "api": "rdk:component:camera",
+      "model": "rand:kinematics-utils:pointcloud-viz",
+      "short_description": "Visualize 3D point cloud files in Viam's Visualiser",
+      "markdown_link": "README.md#point-cloud-visualizer"
     }
   ],
   "applications": null,

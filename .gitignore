@@ -28,3 +28,15 @@ go.work.sum
 # Build outputs
 bin
 *tar.gz
+
+#files
+*.urdf
+*.json
+*.ply
+*.pcd
+*.stl
+*.obj
+*.dae
+*.fbx
+*.glb
+*.gltf

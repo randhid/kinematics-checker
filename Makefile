@@ -1,5 +1,5 @@
 
-GO_BUILD_ENV :=
+GO_BUILD_ENV := 
 GO_BUILD_FLAGS :=
 MODULE_BINARY := bin/kinematics-utils
 
